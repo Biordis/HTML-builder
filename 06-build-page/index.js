@@ -50,7 +50,6 @@ async function compileCss() {
     .catch(err => console.error(err));
   }
   
-
 async function copyAssets(from = assetsFile, to = assetsDir) {
   await fs.rm(to, { recursive: true, force: true });
   await fs.mkdir(to, { recursive: true });
@@ -67,5 +66,4 @@ async function copyAssets(from = assetsFile, to = assetsDir) {
     }
   }
 }
-
 createProject();
