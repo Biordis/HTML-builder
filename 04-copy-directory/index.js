@@ -1,25 +1,34 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 
 const sourcePath = path.join(__dirname, 'files');
 const copyPath = path.join(__dirname, 'files-copy');
 
-async function filesCopy(source, copy) { 
-    await fs.mkdir(copy, { recursive: true });
-    const failiki = await fs.readdir(source, { withFileTypes: true });
-
-    for (let failik of failiki) {
-        const sourcePathSecond = path.join(source, failik.name);
-        const copyPathSecond = path.join(copy, failik.name);
-
-        if (failik.isDirectory()) {
-            await filesCopy(sourcePathSecond, copyPathSecond);
-        } else {
-            await fs.copyFile(sourcePathSecond, copyPathSecond);
-        }
+fs.rm(copyPath, { recursive: true, force: true }, (err) => {
+    if (err) {
+        console.error(`Осторожно, ошибочка при удалении папки: ${err.message}`);
+        return;
     }
-}
+    fs.mkdir(copyPath, { recursive: true }, (err) => {
+        if (err) {
+            console.error(`Осторожно, ошибочка при создании папки: ${err.message}`);
+            return;
+        }
+        fs.readdir(sourcePath, (err, files) => {
+            if (err) {
+                console.error(`Осторожно, ошибочка при чтении папки: ${err.message}`);
+                return;
+            }
+            files.forEach((file) => {
+                const sourceFilePath = path.join(sourcePath, file);
+                const copyFilePath = path.join(copyPath, file);
 
-filesCopy(sourcePath, copyPath)
-    .then(() => console.log('Я скопироваль:D'))
-    .catch(console.error);
+                fs.copyFile(sourceFilePath, copyFilePath, (err) => {
+                    if (err) {
+                        console.error(`Осторожно, ошибочка при копировании файла: ${err.message}`);
+                    }
+                });
+            });
+        });
+    });
+});
